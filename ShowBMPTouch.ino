@@ -12,6 +12,8 @@
 #include "LCD.h"
 #include "XPT2046.h"
 
+#include <Touch.h>
+
 #define MAX_BMP         10                      // bmp file num
 #define FILENAME_LEN    20                      // max file name length
 
@@ -35,7 +37,9 @@ char __Gsbmp_files[4][FILENAME_LEN] =           // add file name here
 
 File bmpFile;
 
-void setup()
+const int clock_divider = SPI_CLOCK_DIV4; // TouchPanel wanted SPI_CLOCK_DIV4
+
+void setupLCD()
 {
     Serial.begin(9600);
     
@@ -52,13 +56,25 @@ void setup()
     
     SPI.setDataMode(SPI_MODE3);
     SPI.setBitOrder(MSBFIRST);
-    SPI.setClockDivider(SPI_CLOCK_DIV2);
+    SPI.setClockDivider(clock_divider);
     SPI.begin();
     
     Tft.lcd_init();
     Tft.lcd_display_string(50, 120, (const uint8_t *)"Starting to display...", FONT_1608, RED);
     Serial.println("SD OK!");
     delay(1000);
+}
+
+void setupTouch() {
+    Tft.lcd_init();                                      // init TFT library
+    Tp.tp_init();
+    Tp.tp_adjust();
+    Tft.lcd_clear_screen(WHITE);
+}
+
+void setup() {
+  setupLCD();
+  setupTouch();
 }
 
 void loop()
@@ -215,4 +231,3 @@ uint32_t read32(File f)
     d |= b;
     return d;
 }
-
